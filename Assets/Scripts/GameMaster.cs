@@ -24,6 +24,11 @@ public class GameMaster : MonoBehaviour
 
         // Apply audio manager
         audioManager = AudioManager.instance;
+
+        audioManager.PlaySound(bgmSoundName);
+
+        // Set gameOver = false;
+        gameOver = false;
     }
 
     // Update is called once per frame
@@ -163,29 +168,119 @@ public class GameMaster : MonoBehaviour
     //        Camera Script        //
     /////////////////////////////////
 
-    void CameraMove()
+    // fieldroom1ToCave
+    void CameraMove1()
     {
-        transform.position = new Vector2(-23.0f, 10.0f);
+        transform.position = new Vector2(-23.0f, 6.0f);
         Camera.main.transform.position = new Vector3(-23.0f, 11.15f, -10f);
+    }
+
+    // caveToFieldroom1
+    void CameraMove2()
+    {
+        transform.position = new Vector2(2.0f, 0.0f);
+        Camera.main.transform.position = new Vector3(0.0f, 0.0f, -10f);
+    }
+
+    // fieldroom1ToFieldroom2
+    void CameraMove3()
+    {
+        transform.position = new Vector2(-13.0f, -3.83f);
+        Camera.main.transform.position = new Vector3(-22.0f, 0.0f, -10f);
+    }
+
+    // fieldroom2ToFieldroom1
+    void CameraMove4()
+    {
+        transform.position = new Vector2(-10.13f, -3.57f);
+        Camera.main.transform.position = new Vector3(0.0f, 0.0f, -10f);
+    }
+
+    // fieldroom1ToFieldroom3
+    void CameraMove5()
+    {
+        transform.position = new Vector2(2.0f, -8.0f);
+        Camera.main.transform.position = new Vector3(0.0f, -10.08f, -10f);
+    }
+
+    // fieldroom3ToFieldroom1
+    void CameraMove6()
+    {
+        transform.position = new Vector2(2.0f, -5.5f);
+        Camera.main.transform.position = new Vector3(0.0f, 0.0f, -10f);
+    }
+
+    // fieldroom1ToDungeonroom1
+    void CameraMove7()
+    {
+        transform.position = new Vector2(0.28f, 6.31f);
+        Camera.main.transform.position = new Vector3(-0.21f, 10.97f, -10f);
+    }
+
+    // dungeonroom1ToFieldroom1
+    void CameraMove8()
+    {
+        transform.position = new Vector2(-5.53f, -1.42f);
+        Camera.main.transform.position = new Vector3(0.0f, 0.0f, -10f);
+    }
+
+    // dungeonroom1ToDungeonroom2
+    void CameraMove9()
+    {
+        transform.position = new Vector2(12.48f, 8.8f);
+        Camera.main.transform.position = new Vector3(21.73f, 11.15f, -10f);
+    }
+
+    // dungeonroom2ToDungeonroom1
+    void CameraMove10()
+    {
+        transform.position = new Vector2(9.0f, 8.8f);
+        Camera.main.transform.position = new Vector3(-0.21f, 10.97f, -10f);
+    }
+
+    // dungeonroom2ToBossroom
+    void CameraMove11()
+    {
+        transform.position = new Vector2(22.2f, 16.13f);
+        Camera.main.transform.position = new Vector3(21.73f, 20.82f, -10f);
+    }
+
+    // bossroomToDungeonroom2
+    void CameraMove12()
+    {
+        transform.position = new Vector2(22.2f, 12.5f);
+        Camera.main.transform.position = new Vector3(21.73f, 11.15f, -10f);
+    }
+
+    // fieldroom1ToTree
+    void CameraMove13()
+    {
+        transform.position = new Vector2(21.85f, -4.46f);
+        Camera.main.transform.position = new Vector3(21.93f, 0.0f, -10f);
+    }
+
+    // treeToFieldroom1
+    void CameraMove14()
+    {
+        transform.position = new Vector2(7.61f, 1.05f);
+        Camera.main.transform.position = new Vector3(0.0f, 0.0f, -10f);
     }
 
     /////////////////////////////////
     //    Sound Effects Script     //
     /////////////////////////////////
 
-
-
-
     // Reference AudioManager script
     private AudioManager audioManager;
 
     // Sound names
     public string bgmSoundName;
-    public string hitSoundName;
-    /*public string rangedSoundName;
+    public string playerHitSoundName;
+    public string rangedSoundName;
     public string meleeSoundName;
     public string pickupSoundName;
-    public string doorSoundName;*/
+    public string doorSoundName;
+    public string lockedSoundName;
 
     /////////////////////////////////
     // 2D Collider Triggers Script //
@@ -206,7 +301,7 @@ public class GameMaster : MonoBehaviour
         {
             Debug.Log("player damage taken");
             lives--;
-            audioManager.PlaySound(hitSoundName);
+            audioManager.PlaySound(playerHitSoundName);
         }
 
         if (other.gameObject.CompareTag("heart"))
@@ -214,7 +309,7 @@ public class GameMaster : MonoBehaviour
             Debug.Log("heart added");
             lives++;
             other.gameObject.SetActive(false);
-            //audioManager.PlaySound(pickupSoundName);
+            audioManager.PlaySound(pickupSoundName);
         }
 
         if (other.gameObject.CompareTag("rupee"))
@@ -223,7 +318,7 @@ public class GameMaster : MonoBehaviour
             rupeeCount++;
             other.gameObject.SetActive(false);
             RupeeCounter();
-            //audioManager.PlaySound(pickupSoundName);
+            audioManager.PlaySound(pickupSoundName);
         }
         
         if (other.gameObject.CompareTag("key"))
@@ -237,7 +332,7 @@ public class GameMaster : MonoBehaviour
                 Debug.Log("money spent");
                 rupeeCount = rupeeCount - 10;
                 RupeeCounter();
-                //audioManager.PlaySound(pickupSoundName);
+                audioManager.PlaySound(pickupSoundName);
             }
             else
             {
@@ -251,14 +346,116 @@ public class GameMaster : MonoBehaviour
             swordHeld = true;
             other.gameObject.SetActive(false);
             haveSword.gameObject.SetActive(true);
-            //audioManager.PlaySound(pickupSoundName);
+            audioManager.PlaySound(pickupSoundName);
         }
 
-        if (other.gameObject.CompareTag("door"))
+        // Doors
+        
+        if (other.gameObject.CompareTag("fieldroom1ToCave"))
         {
             Debug.Log("gone thru door");
-            CameraMove();
-            //audioManager.PlaySound(doorSoundName);
+            CameraMove1();
+            audioManager.PlaySound(doorSoundName);
+        }
+
+        if (other.gameObject.CompareTag("caveToFieldroom1"))
+        {
+            Debug.Log("gone thru door");
+            CameraMove2();
+            audioManager.PlaySound(doorSoundName);
+        }
+
+        if (other.gameObject.CompareTag("fieldroom1ToFieldroom2"))
+        {
+            Debug.Log("gone thru door");
+            CameraMove3();
+            audioManager.PlaySound(doorSoundName);
+        }
+
+        if (other.gameObject.CompareTag("fieldroom2ToFieldroom1"))
+        {
+            Debug.Log("gone thru door");
+            CameraMove4();
+            audioManager.PlaySound(doorSoundName);
+        }
+
+        if (other.gameObject.CompareTag("fieldroom1ToFieldroom3"))
+        {
+            Debug.Log("gone thru door");
+            CameraMove5();
+            audioManager.PlaySound(doorSoundName);
+        }
+
+        if (other.gameObject.CompareTag("fieldroom3ToFieldroom1"))
+        {
+            Debug.Log("gone thru door");
+            CameraMove6();
+            audioManager.PlaySound(doorSoundName);
+        }
+
+        if (other.gameObject.CompareTag("fieldroom1ToDungeonroom1"))
+        {
+            if (keyHeld == true)
+            {
+                Debug.Log("gone thru door");
+                CameraMove7();
+                audioManager.PlaySound(doorSoundName);
+            }
+            else
+            {
+                Debug.Log("key not held");
+                CameraMove8();
+                audioManager.PlaySound(lockedSoundName);
+            }
+        }
+
+        if (other.gameObject.CompareTag("dungeonroom1ToFieldroom1"))
+        {
+            Debug.Log("gone thru door");
+            CameraMove8();
+            audioManager.PlaySound(doorSoundName);
+        }
+
+        if (other.gameObject.CompareTag("dungeonroom1ToDungeonroom2"))
+        {
+            Debug.Log("gone thru door");
+            CameraMove9();
+            audioManager.PlaySound(doorSoundName);
+        }
+
+        if (other.gameObject.CompareTag("dungeonroom2ToDungeonroom1"))
+        {
+            Debug.Log("gone thru door");
+            CameraMove10();
+            audioManager.PlaySound(doorSoundName);
+        }
+
+        if (other.gameObject.CompareTag("dungeonroom2ToBossroom"))
+        {
+            Debug.Log("gone thru door");
+            CameraMove11();
+            audioManager.PlaySound(doorSoundName);
+        }
+
+        if (other.gameObject.CompareTag("bossroomToDungeonroom2"))
+        {
+            Debug.Log("gone thru door");
+            CameraMove12();
+            audioManager.PlaySound(doorSoundName);
+        }
+
+        if (other.gameObject.CompareTag("fieldroom1ToTree"))
+        {
+            Debug.Log("gone thru door");
+            CameraMove13();
+            audioManager.PlaySound(doorSoundName);
+        }
+
+        if (other.gameObject.CompareTag("treeToFieldroom1"))
+        {
+            Debug.Log("gone thru door");
+            CameraMove14();
+            audioManager.PlaySound(doorSoundName);
         }
     }
 
@@ -270,14 +467,15 @@ public class GameMaster : MonoBehaviour
 
     private PauseManager pauseManager;
 
+    public string loseSoundName;
+
     public void EndGame()
     {
-        if (gameOver == false)
+        if (lives <= 0 && gameOver == false)
         {
             gameOver = true;
             Debug.Log("EndGame Run");
-            SceneManager.LoadScene(0);
-            //pauseManager.LoseGame();
+            SceneManager.LoadScene(3);
         }
     }
 }

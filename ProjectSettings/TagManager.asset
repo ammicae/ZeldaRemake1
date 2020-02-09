@@ -10,7 +10,20 @@ TagManager:
   - sword
   - rupee
   - player
-  - door
+  - fieldroom1ToCave
+  - caveToFieldroom1
+  - fieldroom1ToFieldroom2
+  - fieldroom2ToFieldroom1
+  - fieldroom1ToFieldroom3
+  - fieldroom3ToFieldroom1
+  - fieldroom1ToDungeonroom1
+  - dungeonroom1ToFieldroom1
+  - dungeonroom1ToDungeonroom2
+  - dungeonroom2ToDungeonroom1
+  - dungeonroom2ToBossroom
+  - bossroomToDungeonroom2
+  - fieldroom1ToTree
+  - treeToFieldroom1
   layers:
   - Default
   - TransparentFX
@@ -53,6 +66,9 @@ TagManager:
     locked: 0
   - name: Foreground
     uniqueID: 1892843295
+    locked: 0
+  - name: Drops
+    uniqueID: 1057637029
     locked: 0
   - name: Enemy
     uniqueID: 2290412557
