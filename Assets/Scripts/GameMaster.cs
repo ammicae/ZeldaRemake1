@@ -6,6 +6,13 @@ using UnityEngine.SceneManagement;
 
 public class GameMaster : MonoBehaviour
 {   
+    public enum PlayerState
+    {
+        walk,
+        attack,
+        interact
+    }
+    
     /////////////////////////////////
     //   Start & Update Script     //
     /////////////////////////////////
@@ -24,89 +31,120 @@ public class GameMaster : MonoBehaviour
 
         // Apply audio manager
         audioManager = AudioManager.instance;
-
-        audioManager.PlaySound(bgmSoundName);
-
         // Set gameOver = false;
         gameOver = false;
+
+        // Animator
+        animator = GetComponent<Animator>();
+        rb = GetComponent<Rigidbody2D>();
+        currentState = PlayerState.walk;
     }
 
     // Update is called once per frame
     void Update()
     {
-        // PlayerMovement Input
-        movement.x = Input.GetAxisRaw("Horizontal");
-        movement.y = Input.GetAxisRaw("Vertical");
-
         LifeCounter();
-        //PlayerAttack();
+        RangedCounter();
+
+        change = Vector2.zero;
+        change.x = Input.GetAxisRaw("Horizontal");
+        change.y = Input.GetAxisRaw("Vertical");
+
+        if (Input.GetButtonDown("Fire1") && currentState != PlayerState.attack)
+        {
+            StartCoroutine(AttackCo());
+        }
+        if (Input.GetButtonDown("Fire2") && currentState != PlayerState.attack)
+        {
+            if (ammoCount >= 1)
+            {
+                StartCoroutine(RangedAttackCo());
+            }
+            else
+            {
+                Debug.Log("Not enough ammo");
+            }
+        }
+        else if (currentState == PlayerState.walk)
+        {
+            UpdateAnimation();
+        }
     }
 
     /////////////////////////////////
     //    PlayerMovement Script    //
     /////////////////////////////////
-    
+
+    private Animator animator;
+    SpriteRenderer spriteRenderer;
+
+    private Vector2 change;
+
     public float moveSpeed = 5f;
     public Rigidbody2D rb;
 
-    Vector2 movement;
-
-    void FixedUpdate()
+    public PlayerState currentState;
+    private IEnumerator AttackCo()
     {
-        // Movement
-        rb.MovePosition(rb.position + movement * moveSpeed * Time.fixedDeltaTime);
-
-        // Directions for animation
-        /*if ((Input.GetKey("d")) || Input.GetKey("right")) 
-        {
-            animator.Play("Player_side");
-
-            transform.localScale = new Vector2(1, 1);
-        }
-
-        if (Input.GetKey("a") || Input.GetKey("left")) 
-        {
-            animator.Play("Player_side");
-
-            transform.localScale = new Vector2(-1, 1);
-        }
-
-        if (Input.GetKey("w") || Input.GetKey("up")) 
-        {
-            animator.Play("Player_back");
-        }
-
-        if (Input.GetKey("s") || Input.GetKey("down")) 
-        {
-            animator.Play("Player_front");
-        }
-
-        PlayerAttack();*/
+        animator.SetBool("attacking", true);
+        currentState = PlayerState.attack;
+        yield return null;
+        animator.SetBool("attacking", false);
+        yield return new WaitForSeconds(0.3f);
+        currentState = PlayerState.walk;
     }
 
-    /////////////////////////////////
-    //    PlayerAttack Script      //
-    /////////////////////////////////
-
-    bool isAttacking = false;
-
-    /*Animator animator;
-    SpriteRenderer spriteRenderer;
-
-    void PlayerAttack()
+    private IEnumerator RangedAttackCo()
     {
-        if (Input.GetButtonDown("Fire1") && !isAttacking)
-        {
-            isAttacking = true;
-            animator.Play("Melee_attack");
-        }
+        //animator.SetBool("attacking", true);
+        currentState = PlayerState.attack;
+        yield return null;
+        MakeSword();
+        //animator.SetBool("attacking", false);
+        yield return new WaitForSeconds(0.3f);
+        currentState = PlayerState.walk;
+    }
 
-        if (Input.GetButtonDown("Fire2") && !isAttacking)
+    private void MakeSword()
+    {
+        Vector2 temp = new Vector2(animator.GetFloat("moveX"), animator.GetFloat("moveY"));
+        ParticleSword particleSword = Instantiate(projectile, transform.position, Quaternion.identity).GetComponent<ParticleSword>();
+        particleSword.Setup(temp, ChooseSwordDirection());
+        ammoCount--;
+    }
+
+    Vector3 ChooseSwordDirection()
+    {
+        float temp = Mathf.Atan2(animator.GetFloat("moveY"), animator.GetFloat("moveX")) * Mathf.Rad2Deg;
+        return new Vector3(0, 0, temp);
+    }
+
+    void UpdateAnimation()
+    {
+        if (change != Vector2.zero)
         {
-            isAttacking = true;
-            animator.Play("Ranged_attack");
+            MoveCharacter();
+            animator.SetFloat("moveX", change.x);
+            animator.SetFloat("moveY", change.y);
+            animator.SetBool("moving", true);
         }
-    }*/
+        else
+        {
+            animator.SetBool("moving", false);
+        }
+        if (swordHeld == true)
+        {
+            animator.SetBool("swordHeld", true);
+        }
+    }
+
+    //Vector2 movement;
+
+    void MoveCharacter()
+    {
+        // Movement
+        rb.MovePosition(rb.position + change * moveSpeed * Time.fixedDeltaTime);
+    }
 
     /////////////////////////////////
     //         Lives Script        //
@@ -165,14 +203,35 @@ public class GameMaster : MonoBehaviour
     }
 
     /////////////////////////////////
+    //       Ranged Counter        //
+    /////////////////////////////////
+
+    public GameObject projectile;
+        
+    // Accepts the Text UI object in Unity
+    public Text countAmmo;
+
+    // Holds the number of Rupees
+    private int ammoCount;
+
+    void RangedCounter()
+    {
+        countAmmo.text = "X" + ammoCount.ToString();
+    }
+
+    /////////////////////////////////
     //        Camera Script        //
     /////////////////////////////////
 
+    public GameObject dialogue, dialogue2;
+    
     // fieldroom1ToCave
     void CameraMove1()
     {
         transform.position = new Vector2(-23.0f, 6.0f);
         Camera.main.transform.position = new Vector3(-23.0f, 11.15f, -10f);
+        //Instantiate(dialogue, new Vector2(0f, -20f), Quaternion.identity, transform.parent);
+        dialogue.SetActive(true);
     }
 
     // caveToFieldroom1
@@ -180,6 +239,7 @@ public class GameMaster : MonoBehaviour
     {
         transform.position = new Vector2(2.0f, 0.0f);
         Camera.main.transform.position = new Vector3(0.0f, 0.0f, -10f);
+        dialogue.SetActive(false);
     }
 
     // fieldroom1ToFieldroom2
@@ -257,6 +317,7 @@ public class GameMaster : MonoBehaviour
     {
         transform.position = new Vector2(21.85f, -4.46f);
         Camera.main.transform.position = new Vector3(21.93f, 0.0f, -10f);
+        dialogue2.SetActive(true);
     }
 
     // treeToFieldroom1
@@ -264,6 +325,7 @@ public class GameMaster : MonoBehaviour
     {
         transform.position = new Vector2(7.61f, 1.05f);
         Camera.main.transform.position = new Vector3(0.0f, 0.0f, -10f);
+        dialogue2.SetActive(false);
     }
 
     /////////////////////////////////
@@ -275,7 +337,7 @@ public class GameMaster : MonoBehaviour
 
     // Sound names
     public string bgmSoundName;
-    public string playerHitSoundName;
+    //public string playerHitSoundName;
     public string rangedSoundName;
     public string meleeSoundName;
     public string pickupSoundName;
@@ -293,23 +355,26 @@ public class GameMaster : MonoBehaviour
     // Inventory Numbers
     public Text haveKey;
     public GameObject haveSword;
+    public GameObject price;
+    public GameObject wizard;
+    public GameObject merchant;
 
     // Note: Require 'Is Trigger'
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.gameObject.CompareTag("enemy"))
-        {
-            Debug.Log("player damage taken");
-            lives--;
-            audioManager.PlaySound(playerHitSoundName);
-        }
-
         if (other.gameObject.CompareTag("heart"))
         {
             Debug.Log("heart added");
-            lives++;
-            other.gameObject.SetActive(false);
-            audioManager.PlaySound(pickupSoundName);
+            if (lives <= 2) 
+            {
+                lives++;
+                other.gameObject.SetActive(false);
+                audioManager.PlaySound(pickupSoundName);
+            }
+            if (lives == 3)
+            {
+                audioManager.PlaySound(lockedSoundName);
+            }
         }
 
         if (other.gameObject.CompareTag("rupee"))
@@ -320,23 +385,36 @@ public class GameMaster : MonoBehaviour
             RupeeCounter();
             audioManager.PlaySound(pickupSoundName);
         }
-        
+
+        if (other.gameObject.CompareTag("powerUp"))
+        {
+            Debug.Log("powerUp added");
+            ammoCount = 3;
+            other.gameObject.SetActive(false);
+            RangedCounter();
+            audioManager.PlaySound(pickupSoundName);
+        }
+
         if (other.gameObject.CompareTag("key"))
         {
-            if (rupeeCount >= 10)
+            if (rupeeCount >= 5)
             {
                 Debug.Log("key added");
                 keyHeld = true;
                 other.gameObject.SetActive(false);
                 haveKey.text = "X1";
                 Debug.Log("money spent");
-                rupeeCount = rupeeCount - 10;
+                rupeeCount = rupeeCount - 5;
                 RupeeCounter();
                 audioManager.PlaySound(pickupSoundName);
+                price.SetActive(false);
+                merchant.SetActive(false);
+                dialogue2.SetActive(false);
             }
             else
             {
                 Debug.Log("not enough rupees");
+                audioManager.PlaySound(lockedSoundName);
             }
         }
 
@@ -347,6 +425,8 @@ public class GameMaster : MonoBehaviour
             other.gameObject.SetActive(false);
             haveSword.gameObject.SetActive(true);
             audioManager.PlaySound(pickupSoundName);
+            wizard.SetActive(false);
+            dialogue.SetActive(false);
         }
 
         // Doors
@@ -400,6 +480,7 @@ public class GameMaster : MonoBehaviour
                 Debug.Log("gone thru door");
                 CameraMove7();
                 audioManager.PlaySound(doorSoundName);
+                //keyHeld = false;
             }
             else
             {

@@ -39,7 +39,6 @@ public class MenuController : MonoBehaviour
     {
         SceneManager.LoadScene(1);
         Time.timeScale = 1f;
-        audioManager.PlaySound("bgm");
     }
 
     public GameObject aboutScreen;

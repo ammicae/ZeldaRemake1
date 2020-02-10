@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 3869103304706141768}
   - component: {fileID: 3869103304706141775}
   - component: {fileID: 3869103304706141774}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Enemy Follow
   m_TagString: enemy
   m_Icon: {fileID: 0}
@@ -144,10 +144,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffa88eaef1c616443acf19fec245b0bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lives: 1
+  enemyLives: 1
   lootDrop: {fileID: 8168399081699810125, guid: 21d22f565cf0bb04a8dc47e8c0dce844,
     type: 3}
   enemyHitSoundName: enemyHit
+  playerHitSoundName: playerHit
 --- !u!114 &3869103304706141775
 MonoBehaviour:
   m_ObjectHideFlags: 0

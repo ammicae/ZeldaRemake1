@@ -24,6 +24,9 @@ TagManager:
   - bossroomToDungeonroom2
   - fieldroom1ToTree
   - treeToFieldroom1
+  - playerAttack
+  - powerUp
+  - miniCam
   layers:
   - Default
   - TransparentFX
@@ -33,11 +36,11 @@ TagManager:
   - UI
   - 
   - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Enemy
+  - Enemy Projectile
+  - Player
+  - Player Projectile
+  - Minimap
   - 
   - 
   - 
@@ -61,6 +64,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: MiniMap
+    uniqueID: 2879975545
+    locked: 0
   - name: Background
     uniqueID: 3326961251
     locked: 0
@@ -75,6 +81,9 @@ TagManager:
     locked: 0
   - name: NPC
     uniqueID: 1581230611
+    locked: 0
+  - name: rangedAttacks
+    uniqueID: 3894040919
     locked: 0
   - name: Player
     uniqueID: 1556078663
